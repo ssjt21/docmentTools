@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>文档转转工具</title>
+    <link rel="icon" href="../images/ico.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/metro-all.min.css">
+    {% block css %}
+    {% endblock %}
+</head>
+<body>
+
+<!--菜单开始-->
+<nav data-role="ribbonmenu">
+    <ul class="tabs-holder">
+         <li><a href="#section-settings">设置</a></li>
+         <li><a href="#section-help">帮助</a></li>
+         <li><a href="#section-about">关于</a></li>
+    </ul>
+
+    <div class="content-holder">
+        <div class="section" id="section-settings">
+            <button class="ribbon-button" id="btn-wordtplAdm">
+                <span class="icon">
+                    <span class="mif-file-word mif-2x"></span>
+                </span>
+                <span class="caption">模板管理</span>
+            </button>
+             <button class="ribbon-button" id="btn-reportPathConfig">
+                <span class="icon">
+                    <span class="mif-file-download mif-2x"></span>
+                </span>
+                 <span class="caption">导出路径配置</span>
+            </button>
+            <button class="ribbon-button" id="btn-report">
+                <span class="icon">
+                    <span class="mif-spinner4 mif-2x"></span>
+                </span>
+                 <span class="caption">数据生成</span>
+            </button>
+        </div>
+        <div class="section" id="section-help">
+            <button class="ribbon-button" id="btn-tplCuston">
+                <span class="icon">
+                    <span class="mif-wrench mif-2x"></span>
+                </span>
+                <span class="caption">模板定制</span>
+            </button>
+             <button class="ribbon-button" id="btn-manual">
+                <span class="icon">
+                    <span class="mif-open-book mif-2x"></span>
+                </span>
+                 <span class="caption">模板变量手册</span>
+            </button>
+        </div>
+        <div class="section" id="section-about">
+            <button class="ribbon-button" id="btn-author">
+                <span class="icon">
+                    <span class="mif-user mif-2x"></span>
+                </span>
+                 <span class="caption">关于作者</span>
+            </button>
+             <button class="ribbon-button" id="btn-version">
+                <span class="icon">
+                    <span class="mif-info mif-2x"></span>
+                </span>
+                 <span class="caption">程序版本</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!--菜单结束-->
+
+<div class="dialog window" data-role="dialog" id="dialog-Author">
+    <div class="window-caption">
+        <span class="icon mif-user"></span>
+        <span class="title">关于作者</span>
+        <div class="buttons">
+            <span class="btn-close js-dialog-close"></span>
+        </div>
+    </div>
+    <div class="window-content p-2 ">
+        <dl class="horizontal ">
+            <dt>作者：</dt>
+            <dd>随时静听</dd>
+            <dt>Email:</dt>
+            <dd>d1314ziting@163.com</dd>
+        </dl>
+    </div>
+     <div class="dialog-actions">
+        <button class="button info rounded mini  drop-shadow js-dialog-close place-right">确定</button>
+    </div>
+</div>
+{% block content%}
+{% endblock %}
+
+
+<div class="dialog window" data-role="dialog" id="dialog-Version">
+    <div class="window-caption">
+        <span class="icon mif-info"></span>
+        <span class="title">程序版本信息</span>
+        <div class="buttons">
+            <span class="btn-close js-dialog-close"></span>
+        </div>
+    </div>
+    <div class="window-content p-2 ">
+        <dl class="horizontal">
+            <dt>版本:</dt>
+            <dd>Version 1.0</dd>
+            <dt>版权:</dt>
+            <dd>d1314ziting@163.com &copy; 随时静听</dd>
+        </dl>
+    </div>
+     <div class="dialog-actions">
+        <button class="button info rounded mini  drop-shadow js-dialog-close place-right">确定</button>
+    </div>
+</div>
+
+<div class="dialog window" data-role="dialog" id="dialog-report-config">
+    <div class="window-caption">
+        <span class="icon mif-file-download"></span>
+        <span class="title">导出路径配置</span>
+        <div class="buttons">
+            <span class="btn-close js-dialog-close"></span>
+        </div>
+    </div>
+    <div class="window-content p-2 ">
+
+    </div>
+     <div class="dialog-actions">
+        <button class="button info rounded mini  drop-shadow js-dialog-close place-right">确定</button>
+    </div>
+</div>
+
+<!-- 模板定制页面 -->
+
+<script src="../js/Jquery.js"></script>
+<script src="/eel.js"></script>
+<script src="../js/metro.min.js"></script>
+
+<script>
+    //点击 关于作者的事件
+    async function GetAuthorInfo() {
+        var author= await eel.getUserInfo()();
+        return $.parseJSON(author);
+    }
+    $("#btn-author").click(function () {
+
+        var obj= GetAuthorInfo();
+        Metro.dialog.open("#dialog-Author");
+
+    });
+    //
+    eel.expose(AlertInfo);
+    function AlertInfo(msg,level) {
+        Metro.infobox.create("<p>"+msg+"</p>", level);
+
+    }
+
+
+    //点击  程序版本的事件
+    async function GetVersion() {
+        var author= await eel.getVersion()();
+        return $.parseJSON(author);
+    }
+    $("#btn-version").click(function () {
+
+        //var obj= GetAuthorInfo();
+        Metro.dialog.open("#dialog-Version");
+
+    });
+
+    //点击 模板管理跳转 index.html
+    $("#btn-wordtplAdm").click(function () {
+
+    });
+    // 导出路径配置点击的时候
+    $('#btn-reportPathConfig').click(function () {
+
+    });
+
+
+</script>
+{% block js %}
+{% endblock %}
+
+</body>
+</html>

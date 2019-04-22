@@ -1,0 +1,668 @@
+{% extends 'base.html'%}
+
+{% block content %}
+
+<!-- 模板管理 -->
+<div class="pannel btn-wordtplAdm" style="min-height: 400px">
+    <table class="table table-border cell-border compact ">
+        <thead>
+        <th>#</th>
+        <th>模板名称</th>
+        <th>模板文件</th>
+        <th>操作</th>
+        </thead>
+        <tbody class="row-hover">
+
+        <tr class="text-center">
+            <td colspan="4">
+                <button class="button info small flat-button addtplBtn">添加</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <div data-role="window"
+         data-title="更换模板"
+         data-shadow="true"
+         data-place="top-center"
+          data-icon="<span class='mif-pencil'></span>"
+          data-cls-caption="bg-blue"
+         data-close-Action="Metro.actions.HIDE"
+         class="p-2" id="editWindow">
+
+        <input type="text" data-role="input"
+               class="mb-1"
+               data-prepend="模板名称" name="editTplName">
+
+        <div class="input mb-1">
+            <input type="hidden" name="id" >
+            <input type="text" data-role="input" name="editTplPath" data-append="<span class='mif-folder'></span>" title=""
+                   data-role-input="true">
+            <div class="button-group">
+                <button class="button input-clear-button" tabindex="-1" type="button">
+                    <span class="default-icon-cross"></span>
+                </button>
+            </div>
+            <div class="append">
+                <span class='mif-folder' id="editFileClick"></span>
+            </div>
+        </div>
+
+        <p class="text-center">
+            <button class="button small info" id="changeok" style="width: 200px">确定</button>
+        </p>
+
+    </div>
+    <div data-role="window"
+         data-title="添加"
+         data-shadow="true"
+         data-place="top-center"
+          data-cls-caption="bg-cyan"
+          data-icon="<span class='mif-plus'></span>"
+         data-close-Action="Metro.actions.HIDE"
+         class="p-3" id="addWindow">
+
+        <input type="text" data-role="input"
+               class="mb-3"
+               data-prepend="模板名称" name="addTplName">
+        <!--<input type="text" data-role="file"-->
+               <!--class="mb-4"-->
+               <!--data-prepend="模板路径"-->
+               <!--data-append="<span class='mif-folder' ></span>" data-button-title="<span class='mif-folder' id=''></span>"-->
+               <!--title="" name="addTplPath">-->
+        <div class="input mb-1">
+        <input type="text" data-role="input" name="addTplPath" data-append="<span class='mif-folder'></span>" title=""
+               data-role-input="true">
+        <div class="button-group">
+            <button class="button input-clear-button" tabindex="-1" type="button">
+                <span class="default-icon-cross"></span>
+            </button>
+        </div>
+        <div class="append">
+            <span class='mif-folder' id="addFileClick"></span>
+        </div>
+    </div>
+
+        <p class="text-center">
+            <button class="button small info" id="addok" style="width: 200px">确定</button>
+        </p>
+
+    </div>
+</div>
+
+<!-- 导出路径配置 -->
+<div class="pannel d-none btn-reportPathConfig">
+
+    <div class="input mb-1">
+        <input type="text" data-role="input" id="PathValue" data-append="<span class='mif-folder'></span>" title=""
+               data-role-input="true">
+        <div class="button-group">
+            <button class="button input-clear-button" tabindex="-1" type="button">
+                <span class="default-icon-cross"></span>
+            </button>
+        </div>
+        <div class="append">
+            <span class='mif-folder' id="folderclick"></span>
+        </div>
+    </div>
+</div>
+
+<!-- 数据生成 -->
+<!-- 导出路径配置 -->
+<div class="pannel d-none btn-report">
+    <script>
+          async function getExcelPath() {
+              return (await eel.openFile()());
+
+    }
+    async function startUp(excel,tplArr) {
+              return eel.startRun(excel,tplArr)();
+          }
+         var customButtons = [
+            {
+                html: "<span class='mif-folder'></span>",
+                cls: "info",
+                
+                onclick: function () {
+                    getExcelPath().then(function (v) {
+                        $('[name="excelFile"]').val(v);
+                    });
+                }
+            },
+            {
+                html: "<span class='mif-spinner5'></span>",
+                cls: "warning",
+                onclick: function () {
+                    var excel=$('[name="excelFile"]').val();
+                    if (! excel)
+                    {
+                        Metro.infobox.create("<p>请先选择Excel文件！</p>", "alert");
+                        return;
+                    }
+                    var tplArr=getCheckedValue();
+                    if (tplArr.length==0)
+                    {
+                        Metro.infobox.create("<p>至少选择一个模板！</p>", "alert");
+                        return;
+                    }
+                    startUp(excel,tplArr).then(function (v) {
+                        if(v){
+                            Metro.infobox.create("<p>数据生成完毕！</p>", "info");
+
+                        }else{
+                            Metro.infobox.create("<p>数据生成失败</p>", "alert");
+                        }
+
+                    })
+
+
+
+                }
+            }
+        ];
+    </script>
+
+    <div class="input" style="margin-bottom: 10px">
+
+        <input type="text" name="excelFile" data-role="input" data-prepend="请选择Excel文档:" data-custom-buttons="customButtons">
+    </div>
+
+    <table class="table table-border cell-border subcompact">
+        <thead>
+        <tr>
+            <th><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">＃</font></font></th>
+            <th><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">模板名称</font></font></th>
+
+            <th>
+                <font style="vertical-align: inherit;">
+                <font style="vertical-align: inherit;">
+                    操作 |
+                    <button class="button  info mini rounded" id="selectAll">全选</button> |
+                    <button class="button warning mini rounded" id="reverse">反选</button> |
+                    <button class="button alert  mini rounded" id="unSelect">清除</button>
+                </font></font>
+            </th>
+        </tr>
+        </thead>
+        <tbody id="reportTBody">
+
+        </tbody>
+    </table>
+    <div class="info-box" data-role="infobox">
+        <span class="button square closer"></span>
+        <div class="info-box-content">
+            <h3>当前进度</h3>
+            <p>
+                <div data-role="progress"
+     data-type="buffer"
+     data-cls-back="bg-yellow"
+     data-cls-bar="bg-blue"
+     data-cls-buffer="bg-pink"
+     data-value="25" data-buffer="65"></div>
+            </p>
+        </div>
+    </div>
+  <div id="progress-observe"
+    data-role="progress"
+    data-type="buffer" class="mb-4" min="0" ></div>
+
+
+
+</div>
+
+<div class="pannel d-none btn-tplCuston">
+        <div data-role="accordion"
+         data-one-frame="false"
+         data-show-active="true"
+         data-on-frame-open="console.log('frame was opened!', arguments[0])"
+         data-on-frame-close="console.log('frame was closed!', arguments[0])">
+        <div class="frame">
+            <div class="heading">第一步</div>
+            <div class="content">
+                <div class="p-2">准备一个word文件,确定需要填充的位置</div>
+            </div>
+        </div>
+        <div class="frame ">
+            <div class="heading">第二步</div>
+            <div class="content">
+                <div class="p-2">参见模板变量手册，将word文件中需要填补的位置按照{% raw %}{{变量}}{% endraw%},填写到word中。</div>
+                <img src="../images/demo.png" style="width: 600px" alt="">
+            </div>
+        </div>
+        <div class="frame">
+            <div class="heading">第三步</div>
+            <div class="content">
+                <div class="p-2">将修改后的模板文件在<code class="warning">模板管理</code>进行添加</div>
+                <img src="../images/addtpl.png" style="width: 600px" alt="">
+            </div>
+        </div>
+            <div class="frame">
+            <div class="heading">第四步</div>
+            <div class="content">
+                <div class="p-2">选择上传的模板进行数据生成</div>
+                <img src="../images/maketpl.gif" style="width: 600px">
+
+            </div>
+            </div>
+
+            <div class="frame active">
+            <div class="heading">注意事项</div>
+            <div class="content">
+                <div class="p-2">
+
+                    <input type="checkbox" checked disabled
+                       data-role="checkbox"
+                       data-style="2"
+                       data-caption="需要在<code class='warning'>模板管理</code>进行导出路径配置"
+                       data-cls-caption="fg-cyan text-bold"
+                       data-cls-check="bd-cyan myCheck"><br>
+                    <input type="checkbox" checked disabled
+                       data-role="checkbox"
+                       data-style="2"
+                       data-caption="程序处理数字金额到整数，小数点后面统一处理成 .00"
+                       data-cls-caption="fg-cyan text-bold"
+                       data-cls-check="bd-cyan myCheck"><br>
+                    <input type="checkbox" checked disabled
+                       data-role="checkbox"
+                       data-style="2"
+                       data-caption="<code class='warning'>本程序未进行过专业的功能测试，不保证对所有处理数据的完全准确性</code>"
+                       data-cls-caption="fg-cyan text-bold"
+                       data-cls-check="bd-cyan myCheck">
+                </div>
+
+
+            </div>
+        </div>
+        </div>
+</div>
+<div class="pannel d-none btn-manual">
+    <table class="table table-border cell-border subcompact">
+                        <thead>
+                        <tr>
+                            <th><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">变量</font></font></th>
+                            <th><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">变量含义</font></font></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">bidder</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">投标人</font></font></td>
+                        </tr>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">beneficiary</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">受益人</font></font></td>
+                        </tr>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">bidName</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">投标项目名称</font></font></td>
+                        </tr>
+                         <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">projectNo</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">工程编号</font></font></td>
+                        </tr>
+                         <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">expenses</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">担保金额</font></font></td>
+                        </tr>
+                         <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">expiryBidY</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">截标日期的年份</font></font></td>
+                        </tr>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">expiryBidM</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">截标日期的月份</font></font></td>
+                        </tr>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">expiryBidD</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">截标日期的日期号</font></font></td>
+                        </tr>
+                        <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">letterDateY</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">出函日期的年份</font></font></td>
+                        </tr>
+                         <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">letterDateM</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">出函日期的月份</font></font></td>
+                        </tr>
+                         <tr>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">letterDateD</font></font></td>
+                            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">出函日期的日期号</font></font></td>
+                        </tr>
+                        <tr class="text-center">
+                            <td colspan="2">
+                                以上变量使用时请记得加上<code class="primary">{% raw %}{{变量}}{% endraw %}</code>，比如：<code class="primary">{% raw %}{{bidder}}{% endraw %}</code>
+                            </td>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    //初始化页面数据配置
+    async function getAppConf() {
+
+        return  (await eel.loadAppConf()());
+    }
+    async function loadData() {
+        return ( await eel.loadData()())
+    }
+    async function insert(name,fname) {
+        let result=await eel.insertDB(name,fname)();
+        return result
+
+    }
+    async function editData(id,title,filename) {
+        return await eel.editData(id,title,filename)();
+    }
+    async function delData(id) {
+        return eel.DeleteData(id)();
+    }
+       //获取checked 所有的值
+    function getCheckedValue() {
+        var checked=[];
+        $('input:checkbox:checked').each(function() {
+            checked.push($(this).val());
+        });
+        //alert(checked);
+        return checked;
+
+
+    }
+    eel.expose(progressBar);
+    function progressBar(v) {
+        var progress=$('#progress-observe').data("progress");
+        var value=progress.val();
+        value=value+v;
+
+        progress.val(value);
+    }
+    eel.expose(setProgressBar)
+    function setProgressBar(v){
+         $('#progress-observe').attr('min',0);
+        $('#progress-observe').attr('max',v);
+
+    }
+    var tr_tpl=[
+        '<tr class="text-center lineTr">' ,
+        '           <td>#id#</td>' ,
+        '           <td>#name#</td>' ,
+        '            <td>#tplpath#</td>' ,
+        '            <td>' ,
+        '               <button class="tool-button  small info edit ">' ,
+        "                    <span class='mif-pencil'></span>" ,
+        "                </button>" ,
+        "                <button class='tool-button  small alert del '>" ,
+        "                    <span class='mif-bin'></span>" ,
+        "                </button>" ,
+        "            </td>" ,
+        "        </tr>"].join("");
+
+    var selectTrTpl=[' <tr class="lineTr">' ,
+        '            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">#id#</font></font></td>' ,
+        '            <td><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">#title#</font></font></td>' ,
+        '            <td>' ,
+        '                <font style="vertical-align: inherit;">' ,
+        '                <font style="vertical-align: inherit;">' ,
+        '                    <input type="checkbox"  data-role="checkbox" name="tplId" data-style="2" data-cls-caption="fg-cyan text-bold" value="#id#" data-cls-check="bd-cyan myCheck">' ,
+        '                </font>' ,
+        '                </font>' ,
+        '            </td>' ,
+        '        </tr>'].join("");
+    function initData() {
+        loadData().then(function (dataArr) {
+            $('.lineTr').remove();
+            $.each(dataArr,function(index,value){
+                 var tr=tr_tpl.replace(/#id#/g,value[0]);
+                 tr=tr.replace(/#name#/g,value[1]);
+                 tr=tr.replace(/#tplpath#/g,value[2]);
+                 $('.btn-wordtplAdm tbody').prepend(tr);
+                  $('.edit').on('click', function () {
+                        Metro.window.show($('#editWindow'));
+                        var parent=$(this).parent('td').siblings('td');
+                        var id=parent.eq(0).text();
+                        var name=parent.eq(1).text();
+                        var path=parent.eq(2).text();
+                        console.log(id);
+                        $('[name="editTplName"]').val(name);
+                        $('[name="id"]').val(id);
+                        $('[name="editTplPath"]').val(path);
+
+
+                    });
+                  $('.del').on('click',function () {
+                      var parent=$(this).parent('td').siblings('td');
+                      var id=parent.eq(0).text();
+                      var name=parent.eq(1).text();
+                      Metro.dialog.create({
+                        title: "您确定要删除吗?",
+                        content: "<div>您确定要删除 <b>"+name+"</b> 吗？</div>",
+                        actions: [
+                            {
+                                caption: "确定",
+                                cls: "js-dialog-close alert",
+                                onclick: function(){
+                                    delData(id).then(function (v) {
+                                        if(v)
+                                        {
+                                            Metro.infobox.create("<p>删除成功！</p>", "info");
+                                            initData();
+                                        }
+                                        else{
+                                            Metro.infobox.create("<p>删除失败！</p>", "");
+                                        }
+                                    })
+
+                                }
+                            },
+                            {
+                                caption: "取消",
+                                cls: "js-dialog-close",
+                                onclick: function(){
+
+
+                                }
+                            }
+                        ]
+        });
+                  });
+                  var selectTr=selectTrTpl.replace(/#id#/g,value[0]);
+                  selectTr=selectTr.replace(/#title#/g,value[1]);
+                  $('#reportTBody').prepend(selectTr);
+
+            });
+
+
+        });
+
+    }
+    $(function () {
+        var p = getAppConf();
+        p.then(function (value) {
+            //var confObj = $.parseJSON(value);
+            //console.log(confObj);
+            $("#PathValue").val(value.reportPath);
+        });
+
+        Metro.window.hide($('#editWindow'));
+        Metro.window.hide($('#addWindow'));
+        initData();
+        $('.edit').on('click', function () {
+
+            Metro.window.show($('#editWindow'));
+
+        });
+
+
+    });
+
+    /* $.each('click',function () {
+          $('.pannel').removeClass('d-block');
+          alert('.'+$('this').attr("id"));
+          $('.'+$('this').attr("id")).addClass('d-block');
+      });*/
+
+    $("#section-settings > button ,#section-help > button").each(function () {
+        var id = '.' + $(this).attr("id");
+        $(this).on('click', function () {
+            $('.pannel').removeClass('d-block');
+            $('.pannel').addClass('d-none');
+
+            $(id).addClass('d-block');
+            $(id).addClass('d-block');
+        });
+    });
+
+
+    async function getPath(initPath) {
+        let path = await eel.opendir(initPath)();
+        return path;
+    }
+    async function  getFilePath() {
+        let path= await eel.openFile()();
+        return path
+    }
+
+
+
+    $('#folderclick').click(function () {
+        var path = $("#PathValue").val();
+        var p = getPath(path);
+        p.then(function (value) {
+            console.log(value);
+            $("#PathValue").val(value);
+        });
+    });
+    $('#addFileClick').click(function () {
+        var path = $("[name=\"addTplPath\"]").val();
+        var p = getFilePath();
+        console.log(p);
+        p.then(function (value) {
+            console.log(value);
+            $("[name='addTplPath']").val(value);
+        });
+    });
+    $("#editFileClick").click(function () {
+        var p = getFilePath();
+        console.log(p);
+        p.then(function (value) {
+            console.log(value);
+            $("[name='editTplPath']").val(value);
+        });
+    });
+
+
+
+    $('.addtplBtn').click(function () {
+         $('[name="addTplName"]').val("");
+         $('[name="addTplPath"]').val("");
+         $('#addWindow .caption').text("");
+        Metro.window.show($("#addWindow"));
+    });
+
+
+
+
+    $('#addok').click(function () {
+
+         var name=$.trim($('[name="addTplName"]').val());
+        var fname=$('[name="addTplPath"]').val();
+
+        if(name.length==0 || fname.length==0)
+        {
+            Metro.infobox.create("<p>所有字段不能为空！</p>", "alert");
+            return
+        }
+        var p= insert(name,fname).then(function (value) {
+            var sign=$.parseJSON(value);
+            console.log(sign);
+            if (sign)
+            {
+                Metro.infobox.create("<p>添加成功！</p>", "info");
+                initData();
+            }
+            else{
+                Metro.infobox.create("<p>添加失败！</p>", "alert");
+            }
+
+        });
+
+    });
+    $("#changeok").click(function () {
+            var name=$("[name='editTplName']").val();
+            var id=$("[name='id']").val();
+            var filepath=$("[name='editTplPath']").val();
+            editData(id,name,filepath).then(function (v) {
+                if (v)
+                {
+                    Metro.infobox.create("<p>修改成功！</p>", "info");
+                    initData();
+                }
+                else{
+                    Metro.infobox.create("<p>修改失败！</p>", "alert");
+                }
+            });
+        });
+   /* $('#addok').click(function () {
+
+         var name=$.trim($('[name="addTplName"]').val());
+        var tplPath=$('[name="addTplPath"]').val();
+        console.log($('[name="addTplPath"]').get(0).files[0]);
+
+        if(name.length==0 || tplPath.length==0)
+        {
+            Metro.infobox.create("<p>所有字段不能为空！</p>", "alert");
+            return
+        }
+        var filerd=new FileReader();
+        filerd.readAsBinaryString($('[name="addTplPath"]').get(0).files[0]);
+        filerd.onload=function (ev) {
+           var p= insert(name,$('[name="addTplPath"]').get(0).files[0].name,this.result).then(function (value) {
+            var sign=$.parseJSON(value);
+            console.log(sign);
+            if (sign)
+            {
+                Metro.infobox.create("<p>添加成功！</p>", "info");
+            }
+            else{
+                Metro.infobox.create("<p>添加失败！</p>", "alert");
+            }
+
+        });
+        }
+
+
+
+    })*/
+
+   $('#selectAll').click(function () {
+       $("#reportTBody input:checkbox").prop('checked',true);
+   });
+   $('#unSelect').click(function () {
+       $("#reportTBody input:checkbox").prop('checked',false);
+   });
+   $('#reverse').click(function () {
+       $("#reportTBody input:checkbox").each(function () {
+           $(this).prop('checked',$(this).is(':checked')?false:true);
+           // if($(this).attr("checked"))
+           // {
+           //     // $(this).removeAttr('checked');
+           //     $(this).prop('checked',false);
+           // }else{
+           //     $(this).prop('checked',true);
+           //     // $(this).attr('checked',true);
+           // }
+           
+       })
+   });
+
+
+
+
+</script>
+
+{% endblock %}
