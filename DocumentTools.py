@@ -6,10 +6,8 @@
 @time: 2019/04/17
 @email:d1314ziting@163.com
 """
-
+from eel import *
 import threading
-
-import eel
 import sqlite3
 import json
 import os
@@ -199,7 +197,7 @@ def renderWord(excelLineData,wordTpl,reportName,v):
     # print reportName
     doc.save(reportName)
 
-    eel.progressBar(v)
+    progressBar(v)
 
 
 
@@ -214,13 +212,14 @@ def renderWord(excelLineData,wordTpl,reportName,v):
 
 # 获取app 配置文件
 
-@eel.expose
+@expose
 def loadAppConf():
-    reportPath = BASE_DIR
+    reportPath =BASE_DIR
     conf = CONF_FILE
     appConf={u'reportPath':reportPath}
+
     if not os.path.exists(conf):
-        return  json.dumps(appConf)
+        return  appConf
     with open(conf,'r') as f:
         fappconf=json.load(f)
 
@@ -229,15 +228,15 @@ def loadAppConf():
             appConf.update(fappconf)
 
     return appConf
-@eel.expose
+@expose
 def startRun(filename,tplIdArr):
     if not filename:
         return False
     reportPath=loadAppConf().get('reportPath','')
     if not reportPath:
-        eel.AlertInfo("请配置路径导出位置！","alert")
+        AlertInfo("请配置路径导出位置！","alert")
     if not os.path.exists(filename):
-        eel.AlertInfo("选择的EXCEL文件不存在！", "alert")
+        AlertInfo("选择的EXCEL文件不存在！", "alert")
     excelData=read_from_xls(filename)
     for key,item in excelData.items():
         lines=item
@@ -304,13 +303,16 @@ def openDirDialog(path=""):
         selectPath= shell.SHGetPathFromIDList(pidl)
     except:
         selectPath=path
+    try:
+        saveConf({"reportPath":selectPath.decode('gbk')})
+    except:
+        saveConf({"reportPath": selectPath})
 
-    saveConf({"reportPath":selectPath.decode('gbk')})
     return  selectPath
 
-eel.init('web/')
+init('web/')
 
-@eel.expose
+@expose
 def getUserInfo():
     '''
     将作者信息暴漏出去
@@ -321,7 +323,7 @@ def getUserInfo():
         "email":"d1314ziting@163.com",
     }
     return json.dumps(userinfo)
-@eel.expose
+@expose
 def getVersion():
     '''
     程序版本信息暴漏出去
@@ -360,7 +362,7 @@ def moveTpl(filename):
                 msg['path']=filepath
     return msg
 
-@eel.expose
+@expose
 def openFile():
     # wnd = win32gui.FindWindow(None, u"文档转转工具")
     dlg=win32ui.CreateFileDialog(1)
@@ -406,7 +408,7 @@ def moveTpl11(filename,data):
 
 
 
-@eel.expose
+@expose
 def opendir(path):
     # dlg=win32ui.CreateFileDialog(0)
     # flag=dlg.DoModal()
@@ -485,7 +487,7 @@ conn=getConn()
 initDB(conn)
 conn.close()
 # 数据加载
-@eel.expose
+@expose
 def loadData():
     conn=getConn()
     cursor=conn.cursor()
@@ -495,7 +497,7 @@ def loadData():
 
 
 # 添加到数据库
-@eel.expose
+@expose
 def insertDB(name,fname):
     # print name,fname
     if not name:
@@ -514,7 +516,7 @@ def insertDB(name,fname):
     conn.close()
     return True
 
-@eel.expose
+@expose
 def DeleteData(id):
     if not id:
         return False
@@ -527,7 +529,8 @@ def DeleteData(id):
     if filepath:
         filepath=filepath[2]
     if os.path.join(filepath):
-        os.remove(filepath)
+        if os.path.exists(filepath):
+            os.remove(filepath)
     sql="DELETE from template WHERE id=?"
 
     cursor.execute(sql,id)
@@ -535,7 +538,7 @@ def DeleteData(id):
     conn.close()
     return True
 
-@eel.expose
+@expose
 def editData(id,name,filePath):
     if not id:
         return False
@@ -559,7 +562,7 @@ def editData(id,name,filePath):
     return  True
 
 
-@eel.expose
+@expose
 def insertDB1(name,tplpath):
     # print name,tplpath
     if not name:
@@ -584,7 +587,7 @@ def insertDB1(name,tplpath):
 
 
 
-# eel.start('main.html')
-eel.start('templates/index.html',size=(1100,700),templates='templates')
+# start('main.html')
+start('templates/index.html',size=(1100,700),templates='templates')
 if __name__ == '__main__':
     pass
